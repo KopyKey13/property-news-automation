@@ -45,7 +45,7 @@ jobs:
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: |
-          python upload_to_sheets_fixed.py
+          python upload_to_sheets.py
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
