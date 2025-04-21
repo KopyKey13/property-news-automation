@@ -37,9 +37,20 @@ jobs:
           python create_final_csv.py
           python unsplash_image_finder.py
           
-      - name: Set up Google Sheets credentials
+      - name: Debug CSV file
         run: |
-          echo '${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}' > credentials.json
+          echo "Checking CSV file content:"
+          ls -la exports/
+          head -n 5 exports/property_news_social_content_with_images_*.csv
+          
+      - name: Create credentials file directly
+        run: |
+          cat > credentials.json << 'EOL'
+          ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          EOL
+          # Check file was created
+          ls -la credentials.json
+          head -c 50 credentials.json
           
       - name: Upload to Google Sheets
         env:
