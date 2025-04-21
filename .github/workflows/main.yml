@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install feedparser requests beautifulsoup4 python-dateutil
+          pip install feedparser requests beautifulsoup4 python-dateutil pandas google-api-python-client google-auth-httplib2 google-auth-oauthlib
           
       - name: Run property news scripts
         env:
@@ -31,16 +31,20 @@ jobs:
           python fetch_news.py
           python create_social_content.py
           python create_final_csv.py
-          python unsplash_image_finder.py
+          python updated_unsplash_image_finder.py
           
-      - name: Upload CSV files
+      - name: Upload to Google Sheets
+        env:
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: |
+          python upload_to_sheets.py
+          
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: property-news-csv
-          path: exports/*.csv
-          
-      - name: Upload images
-        uses: actions/upload-artifact@v4
-        with:
-          name: property-news-images
-          path: images/*.jpg
+          name: property-news-files
+          path: |
+            exports/*.csv
+            exports/upload_complete.txt
+            images/*.jpg
