@@ -11,7 +11,7 @@ os.makedirs('images', exist_ok=True)
 
 # Unsplash API credentials (create a free account at https://unsplash.com/developers)
 # Replace with your actual access key after signing up
-UNSPLASH_ACCESS_KEY = "YOUR_UNSPLASH_ACCESS_KEY"
+UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY")
 
 # Load the articles
 with open('articles/latest_property_news.json', 'r') as f:
