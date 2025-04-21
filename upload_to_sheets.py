@@ -27,7 +27,7 @@ def upload_to_sheets():
         credentials = service_account.Credentials.from_service_account_file(
             credentials_file, 
             scopes=['https://www.googleapis.com/auth/spreadsheets']
-        ) 
+        )
         
         # Build the Sheets API service
         service = build('sheets', 'v4', credentials=credentials)
@@ -45,13 +45,13 @@ def upload_to_sheets():
         # Read the CSV file
         df = pd.read_csv(csv_path)
         
-        # Get GitHub repository information - hardcode for reliability
+        # Hardcode GitHub repository information for reliability
         repo_owner = "KopyKey13"
         repo_name = "property-news-automation"
         
         print(f"Using GitHub repository: {repo_owner}/{repo_name}")
         
-        # Convert local image paths to GitHub raw URLs
+        # Add a dedicated ImageURL column with GitHub raw URLs
         if 'ImagePath' in df.columns:
             # Function to convert local path to GitHub URL
             def convert_to_github_url(path):
@@ -65,12 +65,16 @@ def upload_to_sheets():
                 
                 return f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/main/{path}"
             
-            # Apply the conversion
-            df['ImagePath'] = df['ImagePath'].apply(convert_to_github_url) 
+            # Create a new ImageURL column with the GitHub URLs
+            df['ImageURL'] = df['ImagePath'].apply(convert_to_github_url)
+            
+            # Keep the original ImagePath column for reference
+            # But also update it to use relative paths consistently
+            df['ImagePath'] = df['ImagePath'].apply(lambda x: re.sub(r'^.*?images/', 'images/', x) if pd.notna(x) and x and '/' in x else x)
             
             # Print some examples for debugging
-            print("Converted image paths examples:")
-            for i, path in enumerate(df['ImagePath'].head(3)):
+            print("Added ImageURL column with examples:")
+            for i, path in enumerate(df['ImageURL'].head(3)):
                 print(f"  {i+1}: {path}")
         
         # Clean the data to remove problematic characters and formatting
