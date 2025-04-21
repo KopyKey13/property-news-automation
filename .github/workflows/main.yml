@@ -22,23 +22,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install feedparser requests beautifulsoup4 python-dateutil pandas google-api-python-client google-auth-httplib2 google-auth-oauthlib
           
+      - name: Create directories
+        run: |
+          mkdir -p exports
+          mkdir -p images
+          mkdir -p articles
+          
       - name: Run property news scripts
         env:
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
-          mkdir -p exports
-          mkdir -p images
           python fetch_news.py
           python create_social_content.py
           python create_final_csv.py
-          python unsplash_image_finder.py
+          python updated_unsplash_image_finder.py
+          
+      - name: Set up Google Sheets credentials
+        run: |
+          echo '${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}' > credentials.json
           
       - name: Upload to Google Sheets
         env:
-          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: |
-          python upload_to_sheets.py
+          python upload_to_sheets_fixed.py
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -48,3 +55,14 @@ jobs:
             exports/*.csv
             exports/upload_complete.txt
             images/*.jpg
+            
+      - name: Notify on completion
+        if: success() 
+        run: |
+          echo "Property news automation completed successfully!"
+          echo "CSV files and images are available as artifacts."
+          
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Property news automation failed. Check the logs for details."
