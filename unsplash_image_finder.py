@@ -9,9 +9,14 @@ import re
 # Create directory for images
 os.makedirs('images', exist_ok=True)
 
-# Unsplash API credentials (create a free account at https://unsplash.com/developers)
-# Replace with your actual access key after signing up
+# Get Unsplash API key from environment variable (set in GitHub Actions)
 UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY")
+
+# Check if API key is available
+if not UNSPLASH_ACCESS_KEY:
+    print("Warning: UNSPLASH_ACCESS_KEY environment variable not found.")
+    print("Please set it as a GitHub Secret and update your workflow file.")
+    print("Continuing with limited functionality...")
 
 # Load the articles
 with open('articles/latest_property_news.json', 'r') as f:
@@ -49,6 +54,10 @@ def extract_keywords(title):
 
 # Function to get image from Unsplash
 def get_unsplash_image(keywords, article_id):
+    # Skip if no API key is available
+    if not UNSPLASH_ACCESS_KEY:
+        return None
+        
     search_query = ' '.join(keywords)
     url = f"https://api.unsplash.com/search/photos?query={search_query}&per_page=1"
     
