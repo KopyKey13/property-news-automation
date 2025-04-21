@@ -8,6 +8,8 @@ on:
 jobs:
   fetch-and-process:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # This is important for pushing to the repository
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,7 +37,7 @@ jobs:
           python fetch_news.py
           python create_social_content.py
           python create_final_csv.py
-          python unsplash_image_finder.py
+          python updated_unsplash_image_finder.py
           
       - name: Debug CSV file
         run: |
@@ -52,12 +54,6 @@ jobs:
           ls -la credentials.json
           head -c 50 credentials.json
           
-      - name: Upload to Google Sheets
-        env:
-          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
-        run: |
-          python upload_to_sheets.py
-          
       - name: Commit images to repository
         run: |
           git config --global user.name "GitHub Actions Bot"
@@ -65,6 +61,12 @@ jobs:
           git add images/
           git commit -m "Add property news images [skip ci]" || echo "No changes to commit"
           git push || echo "Nothing to push"
+          
+      - name: Upload to Google Drive and Google Sheets
+        env:
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: |
+          python google_drive_integration.py
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -76,7 +78,7 @@ jobs:
             images/*.jpg
             
       - name: Notify on completion
-        if: success() 
+        if: success()
         run: |
           echo "Property news automation completed successfully!"
           echo "CSV files and images are available as artifacts."
