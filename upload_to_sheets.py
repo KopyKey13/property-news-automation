@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import json
-import base64
 import pandas as pd
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -27,7 +26,7 @@ def upload_to_sheets():
         credentials = service_account.Credentials.from_service_account_file(
             credentials_file, 
             scopes=['https://www.googleapis.com/auth/spreadsheets']
-        )
+        ) 
         
         # Build the Sheets API service
         service = build('sheets', 'v4', credentials=credentials)
@@ -45,8 +44,22 @@ def upload_to_sheets():
         # Read the CSV file
         df = pd.read_csv(csv_path)
         
-        # Convert DataFrame to values list
-        values = [df.columns.tolist()] + df.values.tolist()
+        # Clean the data to remove problematic characters and formatting
+        for col in df.columns:
+            if df[col].dtype == 'object':  # Only process string columns
+                # Replace newlines with spaces
+                df[col] = df[col].str.replace('\n', ' ').str.replace('\r', ' ')
+                # Replace quotes with single quotes to avoid JSON issues
+                df[col] = df[col].str.replace('"', "'")
+                # Truncate long content to avoid API limits
+                df[col] = df[col].str.slice(0, 40000)
+        
+        # Convert DataFrame to values list - with proper handling for NaN values
+        values = [df.columns.tolist()]
+        for _, row in df.iterrows():
+            # Convert NaN to empty strings and ensure all values are strings
+            row_values = ['' if pd.isna(val) else str(val) for val in row]
+            values.append(row_values)
         
         # Clear the sheet first
         service.spreadsheets().values().clear(
