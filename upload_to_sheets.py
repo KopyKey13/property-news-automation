@@ -20,7 +20,7 @@ def upload_to_sheets():
     credentials = service_account.Credentials.from_service_account_info(
         credentials_info, 
         scopes=['https://www.googleapis.com/auth/spreadsheets']
-    ) 
+    )
     
     # Build the Sheets API service
     service = build('sheets', 'v4', credentials=credentials)
