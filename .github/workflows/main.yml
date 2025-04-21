@@ -22,6 +22,8 @@ jobs:
           pip install feedparser requests beautifulsoup4 python-dateutil unsplash-python
           
       - name: Run property news scripts
+        env:
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
           python fetch_news.py
           python create_social_content.py
