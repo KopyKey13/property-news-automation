@@ -9,10 +9,10 @@ jobs:
   fetch-and-process:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           
@@ -28,16 +28,16 @@ jobs:
           python fetch_news.py
           python create_social_content.py
           python create_final_csv.py
-          python unsplash_image_finder.py
+          python updated_unsplash_image_finder.py
           
       - name: Upload CSV as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: property-news-csv
-          path: exports/property_news_social_content_final_*.csv
+          path: exports/property_news_social_content_with_images_*.csv
           
       - name: Upload images as artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: property-news-images
           path: images/*.jpg
