@@ -28,7 +28,7 @@ jobs:
           python fetch_news.py
           python create_social_content.py
           python create_final_csv.py
-          python updated_unsplash_image_finder.py
+          python unsplash_image_finder.py
           
       - name: Upload CSV as artifact
         uses: actions/upload-artifact@v3
