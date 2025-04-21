@@ -44,6 +44,18 @@ def upload_to_sheets():
         # Read the CSV file
         df = pd.read_csv(csv_path)
         
+        # Get GitHub repository information
+        repo_owner = os.environ.get('GITHUB_REPOSITORY_OWNER', '')
+        repo_name = os.environ.get('GITHUB_REPOSITORY', '').split('/')[-1]
+        
+        # If we have GitHub repository information, update image paths
+        if repo_owner and repo_name and 'ImagePath' in df.columns:
+            # Convert local paths to GitHub raw URLs
+            df['ImagePath'] = df['ImagePath'].apply(
+                lambda x: f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/main/{x}" if pd.notna(x) and x else ""
+            )
+            print(f"Updated image paths to use GitHub raw URLs")
+        
         # Clean the data to remove problematic characters and formatting
         for col in df.columns:
             if df[col].dtype == 'object':  # Only process string columns
