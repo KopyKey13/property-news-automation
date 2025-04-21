@@ -35,7 +35,7 @@ jobs:
           python fetch_news.py
           python create_social_content.py
           python create_final_csv.py
-          python updated_unsplash_image_finder.py
+          python unsplash_image_finder.py
           
       - name: Debug CSV file
         run: |
@@ -56,7 +56,7 @@ jobs:
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: |
-          python upload_to_sheets_fixed_v3.py
+          python upload_to_sheets.py
           
       - name: Commit images to repository
         run: |
