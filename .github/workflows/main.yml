@@ -9,35 +9,38 @@ jobs:
   fetch-and-process:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install feedparser requests beautifulsoup4 python-dateutil unsplash-python
+          pip install feedparser requests beautifulsoup4 python-dateutil
           
       - name: Run property news scripts
         env:
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
+          mkdir -p exports
+          mkdir -p images
           python fetch_news.py
           python create_social_content.py
           python create_final_csv.py
           python unsplash_image_finder.py
           
-      - name: Upload CSV as artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload CSV files
+        uses: actions/upload-artifact@v4
         with:
           name: property-news-csv
-          path: exports/property_news_social_content_with_images_*.csv
+          path: exports/*.csv
           
-      - name: Upload images as artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload images
+        uses: actions/upload-artifact@v4
         with:
           name: property-news-images
           path: images/*.jpg
