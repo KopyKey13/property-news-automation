@@ -5,6 +5,7 @@ import pandas as pd
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from datetime import datetime
+import re
 
 # Path to the CSV file
 today = datetime.now().strftime('%Y-%m-%d')
@@ -26,7 +27,7 @@ def upload_to_sheets():
         credentials = service_account.Credentials.from_service_account_file(
             credentials_file, 
             scopes=['https://www.googleapis.com/auth/spreadsheets']
-        )
+        ) 
         
         # Build the Sheets API service
         service = build('sheets', 'v4', credentials=credentials)
@@ -44,17 +45,33 @@ def upload_to_sheets():
         # Read the CSV file
         df = pd.read_csv(csv_path)
         
-        # Get GitHub repository information
-        repo_owner = os.environ.get('GITHUB_REPOSITORY_OWNER', '')
-        repo_name = os.environ.get('GITHUB_REPOSITORY', '').split('/')[-1]
+        # Get GitHub repository information - hardcode for reliability
+        repo_owner = "KopyKey13"
+        repo_name = "property-news-automation"
         
-        # If we have GitHub repository information, update image paths
-        if repo_owner and repo_name and 'ImagePath' in df.columns:
-            # Convert local paths to GitHub raw URLs
-            df['ImagePath'] = df['ImagePath'].apply(
-                lambda x: f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/main/{x}" if pd.notna(x) and x else ""
-            )
-            print(f"Updated image paths to use GitHub raw URLs")
+        print(f"Using GitHub repository: {repo_owner}/{repo_name}")
+        
+        # Convert local image paths to GitHub raw URLs
+        if 'ImagePath' in df.columns:
+            # Function to convert local path to GitHub URL
+            def convert_to_github_url(path):
+                if pd.isna(path) or not path:
+                    return ""
+                
+                # Extract just the filename part if it's a path
+                if '/' in path:
+                    # Make sure we're only using the path relative to the repo root
+                    path = re.sub(r'^.*?images/', 'images/', path)
+                
+                return f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/main/{path}"
+            
+            # Apply the conversion
+            df['ImagePath'] = df['ImagePath'].apply(convert_to_github_url) 
+            
+            # Print some examples for debugging
+            print("Converted image paths examples:")
+            for i, path in enumerate(df['ImagePath'].head(3)):
+                print(f"  {i+1}: {path}")
         
         # Clean the data to remove problematic characters and formatting
         for col in df.columns:
