@@ -11,9 +11,13 @@ import re
 import requests
 import time
 
-# Path to the CSV file
+# Path to the CSV file - look for both possible filenames
 today = datetime.now().strftime('%Y-%m-%d')
-csv_path = f'exports/property_news_social_content_final_{today}.csv'
+csv_path_with_images = f'exports/property_news_social_content_with_images_{today}.csv'
+csv_path_final = f'exports/property_news_social_content_final_{today}.csv'
+
+# Use the CSV with images if it exists, otherwise use the final CSV
+csv_path = csv_path_with_images if os.path.exists(csv_path_with_images) else csv_path_final
 
 def upload_to_google_drive():
     try:
@@ -70,7 +74,11 @@ def upload_to_google_drive():
         
         # Upload images from the images directory
         if os.path.exists('images'):
-            for filename in os.listdir('images'):
+            image_files = os.listdir('images')
+            if not image_files:
+                print("Warning: 'images' directory exists but is empty. No images to upload.")
+            
+            for filename in image_files:
                 if filename.endswith(('.jpg', '.jpeg', '.png', '.gif')):
                     file_path = os.path.join('images', filename)
                     
@@ -107,6 +115,8 @@ def upload_to_google_drive():
                     # Store the mapping from local path to Google Drive URL
                     image_urls[f'images/{filename}'] = download_url
                     print(f"Uploaded {filename} to Google Drive: {download_url}")
+        else:
+            print("Warning: 'images' directory does not exist. No images to upload.")
         
         return image_urls
     
@@ -145,6 +155,8 @@ def upload_to_sheets_sequential(image_urls):
                 print("Exports directory does not exist")
             return
         
+        print(f"Using CSV file: {csv_path}")
+        
         # Read the CSV file
         df = pd.read_csv(csv_path)
         
@@ -168,6 +180,7 @@ def upload_to_sheets_sequential(image_urls):
                 if path in image_urls:
                     return image_urls[path]
                 else:
+                    print(f"Warning: No Drive URL found for image path: {path}")
                     return ""
             
             # Create a new DriveImageURL column with the Google Drive URLs
@@ -181,6 +194,10 @@ def upload_to_sheets_sequential(image_urls):
             print("Added DriveImageURL column with examples:")
             for i, path in enumerate(df['DriveImageURL'].head(3)):
                 print(f"  {i+1}: {path}")
+        
+        # Add LastUpdated column if it doesn't exist
+        if 'LastUpdated' not in df.columns:
+            df['LastUpdated'] = ""
         
         # Clean the data to remove problematic characters and formatting
         for col in df.columns:
