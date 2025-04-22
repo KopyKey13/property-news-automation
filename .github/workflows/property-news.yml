@@ -29,21 +29,22 @@ jobs:
           mkdir -p exports
           mkdir -p images
           mkdir -p articles
+          mkdir -p formatted
           
-      - name: Run property news scripts
+      - name: Run daily property news scripts
         env:
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
-          python fetch_news.py
-          python create_social_content.py
-          python create_final_csv.py
+          python fetch_news_daily.py
+          python create_social_content_daily.py
+          python create_final_csv_daily.py
           python unsplash_image_finder.py
           
       - name: Debug CSV file
         run: |
           echo "Checking CSV file content:"
           ls -la exports/
-          head -n 5 exports/property_news_social_content_with_images_*.csv || echo "CSV file not found"
+          head -n 5 exports/property_news_social_content_final_*.csv || echo "CSV file not found"
           
       - name: Create credentials file directly
         run: |
@@ -66,7 +67,7 @@ jobs:
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: |
-          python google_drive_integration.py
+          python google_drive_integration_daily.py
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -80,10 +81,10 @@ jobs:
       - name: Notify on completion
         if: success()
         run: |
-          echo "Property news automation completed successfully!"
-          echo "CSV files and images are available as artifacts."
+          echo "Daily property news automation completed successfully!"
+          echo "CSV files with 2 posts per platform per day and images are available as artifacts."
           
       - name: Notify on failure
         if: failure()
         run: |
-          echo "Property news automation failed. Check the logs for details."
+          echo "Daily property news automation failed. Check the logs for details."
