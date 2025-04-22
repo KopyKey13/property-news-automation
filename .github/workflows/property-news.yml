@@ -46,6 +46,8 @@ jobs:
           ls -la exports/
           echo "Checking images directory:"
           ls -la images/ || echo "No images found"
+          echo "Checking image content in CSV:"
+          grep -i "image" exports/*.csv || echo "No image references found in CSV"
           
       - name: Create credentials file directly
         run: |
@@ -64,11 +66,11 @@ jobs:
           git commit -m "Add property news images [skip ci]" || echo "No changes to commit"
           git push || echo "Nothing to push"
           
-      - name: Upload to Google Drive and Google Sheets
+      - name: Upload to Google Drive and Google Sheets with robust matching
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: |
-          python google_drive_integration_daily.py
+          python google_drive_integration_robust.py
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
