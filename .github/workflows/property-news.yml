@@ -38,7 +38,7 @@ jobs:
           python fetch_news_daily.py
           python create_social_content_daily.py
           python create_final_csv_daily.py
-          python updated_unsplash_image_finder.py
+          python unsplash_image_finder.py
           
       - name: Debug files
         run: |
