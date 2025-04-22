@@ -40,11 +40,12 @@ jobs:
           python create_final_csv_daily.py
           python unsplash_image_finder.py
           
-      - name: Debug CSV file
+      - name: Debug files
         run: |
-          echo "Checking CSV file content:"
+          echo "Checking CSV files:"
           ls -la exports/
-          head -n 5 exports/property_news_social_content_final_*.csv || echo "CSV file not found"
+          echo "Checking images directory:"
+          ls -la images/ || echo "No images found"
           
       - name: Create credentials file directly
         run: |
@@ -67,7 +68,7 @@ jobs:
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: |
-          python google_drive_integration_daily.py
+          python google_drive_integration_daily_fixed.py
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
