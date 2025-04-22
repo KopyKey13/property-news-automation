@@ -38,14 +38,13 @@ jobs:
           python fetch_news_daily.py
           python create_social_content_daily.py
           python create_final_csv_daily.py
-          python unsplash_image_finder.py
           
       - name: Debug files
         run: |
           echo "Checking CSV files:"
           ls -la exports/
-          echo "Checking images directory:"
-          ls -la images/ || echo "No images found"
+          echo "Checking CSV content:"
+          head -n 5 exports/*.csv
           
       - name: Create credentials file directly
         run: |
@@ -55,6 +54,13 @@ jobs:
           # Check file was created
           ls -la credentials.json
           
+      - name: Relevant Image Solution - Content-based matching
+        env:
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+        run: |
+          python relevant_image_solution.py
+          
       - name: Commit images to repository
         run: |
           git config --global user.name "GitHub Actions Bot"
@@ -62,12 +68,6 @@ jobs:
           git add images/
           git commit -m "Add property news images [skip ci]" || echo "No changes to commit"
           git push || echo "Nothing to push"
-          
-      - name: Direct Image Solution - Guaranteed to work
-        env:
-          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
-        run: |
-          python direct_image_solution.py
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -82,7 +82,7 @@ jobs:
         if: success()
         run: |
           echo "Daily property news automation completed successfully!"
-          echo "CSV files with 2 posts per platform per day and images are available as artifacts."
+          echo "CSV files with 2 posts per platform per day and relevant images are available as artifacts."
           
       - name: Notify on failure
         if: failure()
