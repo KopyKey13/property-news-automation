@@ -68,7 +68,7 @@ jobs:
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: |
-          python google_drive_integration_daily_fixed.py
+          python google_drive_integration_daily.py
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
