@@ -64,11 +64,12 @@ jobs:
         run: |
           python relevant_image_solution.py
           
-      - name: Improved Google Sheet Integration
+      - name: Fixed Image Integration
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
-          python improved_google_sheet_integration.py
+          python fixed_image_integration.py
           
       - name: Commit images to repository
         run: |
