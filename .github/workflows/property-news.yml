@@ -37,7 +37,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python fetch_news_daily.py
-          python content_tracking_system.py
+          python enhanced_content_tracking.py
           python ai_content_generator.py
           python create_social_content_daily.py
           python create_final_csv_daily.py
@@ -63,6 +63,12 @@ jobs:
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
           python relevant_image_solution.py
+          
+      - name: Improved Google Sheet Integration
+        env:
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: |
+          python improved_google_sheet_integration.py
           
       - name: Commit images to repository
         run: |
