@@ -34,8 +34,11 @@ jobs:
       - name: Run daily property news scripts
         env:
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python fetch_news_daily.py
+          python content_tracking_system.py
+          python ai_content_generator.py
           python create_social_content_daily.py
           python create_final_csv_daily.py
           
