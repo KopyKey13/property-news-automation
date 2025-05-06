@@ -11,13 +11,16 @@ from dateutil import parser as date_parser
 
 # List of RSS feeds to fetch
 RSS_FEEDS = [
-    "https://propertyindustryeye.com/feed/",
-    "https://www.estateagenttoday.co.uk/rss",
-    "https://www.propertyreporter.co.uk/rss/news",
-    "https://www.landlordtoday.co.uk/rss",
+    "https://www.progressiveproperty.co.uk/blog",
+    "https://www.propertyhub.net/feed/",
     "https://www.property118.com/feed/",
-    "https://rss.app/feeds/_GpyXXg4aOeD2FglM.xml",
-    "https://www.insidehousing.co.uk/rss"
+    "https://www.propertyinvestortoday.co.uk/rss",
+    "http://www.rightmove.co.uk/news/feed",
+    "https://energysavingtrust.org.uk/feed/",
+    "https://www.nationwidehousepriceindex.co.uk/feed/rss",
+    "https://www.homesandproperty.co.uk/rss",
+    "https://hmlandregistry.blog.gov.uk/feed/",
+    "https://www.zoopla.co.uk/discover/property-news/"
 ]
 
 # Create directories if they don't exist
