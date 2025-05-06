@@ -63,9 +63,8 @@ jobs:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
-          # This script now handles image fetching, Google Drive upload, and multi-tab Google Sheet update
-          # Using the corrected version of the script
-          python fixed_image_integration_multi_tab_v2.py
+          # This script now handles image fetching, Google Drive upload, multi-tab Google Sheet update, and NaN value sanitization
+          python fixed_image_integration_multi_tab_v3.py
           
       - name: Commit images to repository
         run: |
