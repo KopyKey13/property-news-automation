@@ -57,7 +57,7 @@ def get_unsplash_image(keywords_for_query):
         if response.status_code == 200:
             data = response.json()
             image_url = data["urls"]["regular"]
-            attribution = f"Photo by {data["user"]["name"]} on Unsplash"
+            attribution = f"Photo by {data['user']['name']} on Unsplash"
             return image_url, attribution
         else:
             print(f"Error from Unsplash API: {response.status_code} - {response.text}")
@@ -160,7 +160,7 @@ def upload_to_google_drive(df_with_images):
         drive_service = build("drive", "v3", credentials=credentials)
         
         folder_name = f"property_news_images_{today}"
-        query = f"name=\\'{folder_name}\\' and mimeType=\\'application/vnd.google-apps.folder\\' and trashed=false"
+        query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
         results = drive_service.files().list(q=query).execute()
         items = results.get("files", [])
         
@@ -179,7 +179,8 @@ def upload_to_google_drive(df_with_images):
         for index, row in df_with_images.iterrows():
             local_image_path = str(row.get("ImagePath", ""))
             if not local_image_path or not os.path.exists(local_image_path):
-                print(f"Image path missing or file does not exist for row {index+1}: 	rade_mark_sign{local_image_path}". Skipping upload.")
+                # Corrected print statement below
+                print(f"Image path missing or file does not exist for row {index+1}: '{local_image_path}'. Skipping upload.")
                 continue
 
             filename = os.path.basename(local_image_path)
@@ -241,7 +242,7 @@ def upload_to_sheets_multi_tab(df_with_drive_urls):
         # Clean data for Sheets API
         for col in df_with_drive_urls.columns:
             if df_with_drive_urls[col].dtype == "object":
-                df_with_drive_urls[col] = df_with_drive_urls[col].astype(str).str.replace("\n|\r", " ", regex=True).str.replace("\"", "\"", regex=False).str.slice(0, 40000)
+                df_with_drive_urls[col] = df_with_drive_urls[col].astype(str).str.replace("\n|\r", " ", regex=True).str.replace('"', '""', regex=False).str.slice(0, 40000)
 
         platforms = df_with_drive_urls["Platform"].unique()
         for platform_name in platforms:
