@@ -9,7 +9,7 @@ jobs:
   fetch-and-process:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # This is important for pushing to the repository
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install feedparser requests beautifulsoup4 python-dateutil pandas google-api-python-client google-auth-httplib2 google-auth-oauthlib pillow
+          pip install feedparser requests beautifulsoup4 python-dateutil pandas google-api-python-client google-auth-httplib2 google-auth-oauthlib pillow openai
           
       - name: Create directories
         run: |
@@ -40,44 +40,43 @@ jobs:
           python enhanced_content_tracking.py
           python ai_content_generator.py
           python create_social_content_daily.py
-          python create_final_csv_daily.py
+          python create_final_csv_daily_v2.py # Use V2 for Zapier compatibility (includes Title)
           
       - name: Debug files
         run: |
           echo "Checking CSV files:"
           ls -la exports/
-          echo "Checking CSV content:"
-          head -n 5 exports/*.csv
+          echo "Checking CSV content (final_v2):"
+          head -n 10 exports/property_news_social_content_final_v2_$(date +%Y-%m-%d).csv || echo "Final V2 CSV not found or empty"
+          echo "Checking articles JSON content:"
+          head -n 10 articles/latest_property_news.json || echo "Articles JSON not found or empty"
           
       - name: Create credentials file directly
         run: |
           cat > credentials.json << 'EOL'
           ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
           EOL
-          # Check file was created
           ls -la credentials.json
           
-      - name: Relevant Image Solution - Content-based matching
+      - name: Image Integration and Multi-Tab Google Sheet Upload
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
-          python relevant_image_solution.py
-          
-      - name: Fixed Image Integration
-        env:
-          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
-          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
-        run: |
-          python fixed_image_integration.py
+          # This script now handles image fetching, Google Drive upload, and multi-tab Google Sheet update
+          python fixed_image_integration_multi_tab.py
           
       - name: Commit images to repository
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add images/
-          git commit -m "Add property news images [skip ci]" || echo "No changes to commit"
-          git push || echo "Nothing to push"
+          if git diff --staged --quiet; then
+            echo "No new images to commit."
+          else
+            git commit -m "Add property news images [skip ci]"
+            git push || echo "Nothing to push or push failed (e.g. protected branch)"
+          fi
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -85,16 +84,20 @@ jobs:
           name: property-news-files
           path: |
             exports/*.csv
-            exports/upload_complete.txt
+            exports/upload_complete_multitab.txt
             images/*.jpg
+            articles/latest_property_news.json
+            articles/processed_articles_history.json
+            articles/published_posts_history.json
             
       - name: Notify on completion
         if: success()
         run: |
           echo "Daily property news automation completed successfully!"
-          echo "CSV files with 2 posts per platform per day and relevant images are available as artifacts."
+          echo "CSV files and multi-tab Google Sheet output ready for Zapier."
           
       - name: Notify on failure
         if: failure()
         run: |
           echo "Daily property news automation failed. Check the logs for details."
+
